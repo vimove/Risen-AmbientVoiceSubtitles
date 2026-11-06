@@ -1,0 +1,150 @@
+# NPC随口台词头顶字幕（AmbientVoiceSubtitles）
+
+[English](README.md) · **简体中文**
+
+给《崛起》（Risen，2009）里 NPC 的**随口台词**（ambient voice line，社区里习惯叫 bark）
+加头顶浮动字幕。
+
+游戏里 NPC 发现你、叫你收武器、抱怨天气等等的时候会播一句短语音，但没有任何文字。
+这个 ASI 插件把这句话以字幕形式显示在说话者头顶，停留几秒。
+
+插件**本身不带任何文本**。字幕文本直接从游戏自己的 `data\compiled\strings.pak`
+（`svms` 表）里读，并跟随游戏选项里选的语言。装了汉化补丁的玩家看到汉化文本，
+英文玩家看到英文。
+
+## 文档
+
+本 README 有两个语言版本：
+
+- **English** — [README.md](README.md)
+- **简体中文** — 本页
+
+其余文档：
+
+- 中文安装说明（给玩家看的）: [安装说明.txt](安装说明.txt) — 中文
+- 中文开发/历史笔记: [docs/开发日志.md](docs/开发日志.md) — 中文
+- 维护者技术笔记（挂钩、数据流、踩坑记录）: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 英文
+
+## 功能
+
+- 字幕出现在**说话那个 NPC 的头顶**，不是固定在屏幕某角。
+- 支持英文、德文、法文、意大利文、西班牙文、波兰文、俄文的游戏文本；
+  `Language=auto` 跟随游戏当前设置。
+- 支持替换了上述任一语言列的汉化补丁（多数 Risen 汉化补丁替换的是英文列——
+  这时游戏语言请设为英文）。
+- 所有选项即时生效：改完 `.ini` 保存，约 2 秒内应用，不用重启、不用重新读档。
+- 可选的距离淡出；高度、停留时长、淡入淡出时间、颜色、同屏最大条数都可调。
+
+## 运行要求
+
+- 《崛起》（Risen，2009）**Steam 版**。只在当前 Steam 版本上测试过
+  （原版零售版与公开测试版都没测）。
+- 游戏 `bin` 目录里要有 ASI 加载器（基于
+  [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases)
+  的 `d3d9.dll`）。已经在用其他 ASI mod 的话，你已经有它了。
+
+## 安装
+
+1. 把发布 zip 里的 `bin` 目录整个复制进游戏的 `bin` 目录，
+   例如 `...\Steam\steamapps\common\Risen\bin`。
+2. 想改设置就编辑 `AmbientVoiceSubtitles.ini`，改完约 2 秒生效。
+
+装完应该是这样：
+
+```
+bin\d3d9.dll                      (ASI 加载器，你自己的)
+bin\AmbientVoiceSubtitles.asi     (本插件)
+bin\AmbientVoiceSubtitles.ini     (配置)
+```
+
+如果 `.ini` 不存在，插件会在 `.asi` 旁边自动写一份默认配置。默认内容由构建时的
+[`config/AmbientVoiceSubtitles.ini`](config/AmbientVoiceSubtitles.ini) 生成，
+所以永远和本文档的选项一致。
+
+## 配置
+
+`AmbientVoiceSubtitles.ini`（每个键在文件里都有中英双语注释）：
+
+| 键 | 默认值 | 含义 |
+| --- | --- | --- |
+| `Enabled` | `1` | 总开关 |
+| `Language` | `auto` | `auto` 跟随游戏语音语言；也可强制 `English` / `German` / `French` / `Italian` / `Spanish` / `Polish` / `Russian`；或直接写原始列名，例如 `French_Text` |
+| `HeightCm` | `230` | 字幕相对 NPC 头顶的高度（厘米） |
+| `DurationMs` | `3000` | 一条字幕停留多久 |
+| `FadeMs` | `800` | 淡入 / 淡出时间 |
+| `DistanceFade` | `1` | 是否随距离淡出 |
+| `FadeStartM` | `10` | 开始淡出的距离（米） |
+| `FadeEndM` | `15` | 完全消失的距离（米） |
+| `MaxMessages` | `8` | 同屏最多几条 |
+| `Color` | `FFFFFFFF` | `AARRGGBB`；也接受 6 位 `RRGGBB`（自动补 `FF` 不透明度） |
+
+## 工作原理（简版）
+
+- 通过 `Script_Game.dll` 的导入表挂钩 `Entity::StartSaySVM`，得知是哪个实体开始说话。
+- 通过 `Script.dll` 的导入表挂钩 `gCSvmAdmin::FormatSampleTitle`，
+  拿到即将播放那一句的 `SVM_<voice>_<svm>` 键。
+- 拿这个键去 `strings.pak` → `svms` 表 → 与游戏语言对应的那一列查文本。
+- 用说话者的几何实体配合 `gCGUIEntityRenderer::AddScreenMessage` 定位文本，
+  再从渲染器 `OnBeginFrame` 虚表槽里的钩子重绘排队中的消息。
+
+细节（含还原出的修饰名，以及最耗时间的那些坑）见
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
+
+## 编译
+
+需要 Windows，以及 [zig](https://ziglang.org/download/)（不必装 Visual Studio）
+或 Visual Studio 的 C++ 工具链，二者之一。
+
+```bat
+python tools\gen_ini_template.py     :: 只有改过 config\*.ini 之后才需要跑
+tools\build.bat                      :: 有 zig 就用 zig，没有就用 MSVC cl
+```
+
+产物：`build\AmbientVoiceSubtitles.asi`，复制到游戏 `bin` 目录即可。
+
+`src\ini_template.h` 是生成出来的——**不要手改**。它把
+`config\AmbientVoiceSubtitles.ini` 逐字节嵌进二进制；用户还没有 `.ini` 时，
+插件就把这份默认配置写出来。
+
+## 目录结构
+
+```
+src/AmbientVoiceSubtitles.c   插件本体（单编译单元，纯 C）
+src/ini_template.h            生成物：默认 .ini 作为 C 字符串
+config/AmbientVoiceSubtitles.ini   随包发布的默认配置
+tools/gen_ini_template.py     .ini -> src/ini_template.h
+tools/build.bat               构建脚本（zig 或 MSVC）
+docs/ARCHITECTURE.md          挂钩、数据流、踩坑记录（维护者看，英文）
+docs/开发日志.md              开发日志（中文）
+安装说明.txt                  玩家安装说明（中文）
+```
+
+## 排错
+
+插件会写 `bin\AmbientVoiceSubtitles.log`。几个有用的行：
+
+- `PAK loaded: N keys, column=English_Text` —— 文本读到了；看看列名是不是你想要的语言。
+- `PAK not found`，或 `N` 很小 —— `strings.pak` 没读到。
+- **完全没有日志文件** —— 插件根本没被加载，检查 ASI 加载器。
+
+报 bug 时请附上日志（或相关那几行）、游戏版本，以及有没有装汉化补丁。
+
+## 已知限制
+
+- 同屏最多 8 条。
+- 说话者按「最近 1.5 秒内开口、且距离最近的那个实体」匹配。同一位置两个 NPC
+  说同一句话时，字幕可能挂到另一个人头上。
+- 有少数台词在游戏数据里找不到对应行，会被静默跳过。
+
+## 参与
+
+欢迎报 bug 和提 PR。项目刻意保持得小而零依赖：一个 C 文件，不链接任何外部库
+（读 `strings.pak` 需要的 zlib inflate 就在源码里实现了）。想接手这个项目的话，
+需要的东西都在本仓库——上面有编译说明，挂钩清单在 `docs/ARCHITECTURE.md`。
+
+## 许可
+
+MIT —— 见 [LICENSE](LICENSE)。
+
+本项目与 Piranha Bytes、THQ Nordic 无关。*Risen* 及其素材归各自权利人所有；
+本仓库不包含任何游戏数据。
