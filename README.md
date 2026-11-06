@@ -1,7 +1,9 @@
 # AmbientVoiceSubtitles
 
-**NPC随口台词头顶字幕** — floating subtitles above NPCs for their ambient voice
-lines ("barks") in *Risen* (2009).
+**English** · [简体中文](README.zh-CN.md)
+
+Floating subtitles above NPCs for their ambient voice lines ("barks") in
+*Risen* (2009).
 
 Risen plays a short voice line whenever an NPC spots you, tells you to put your
 weapon away, complains about the weather, and so on. There is audio but no text.
@@ -12,9 +14,18 @@ out of the game's own `data\compiled\strings.pak` (the `svms` table) and follows
 the language selected in the game options. Players who run a translation patch
 see the translated text; players on English see English.
 
-* 中文安装说明: [安装说明.txt](安装说明.txt)
-* 中文开发/历史笔记: [docs/开发日志.md](docs/开发日志.md)
-* Maintainer notes (hooks, data flow): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+## Documentation
+
+This README is available in two languages:
+
+- **English** — this page
+- **简体中文** — [README.zh-CN.md](README.zh-CN.md)
+
+Other documents:
+
+- Maintainer notes (hooks, data flow, gotchas): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — English
+- End-user install guide: [安装说明.txt](安装说明.txt) — Chinese
+- Development log: [docs/开发日志.md](docs/开发日志.md) — Chinese
 
 ## Features
 
@@ -57,8 +68,8 @@ at build time, so it always matches the documented options.
 
 ## Configuration
 
-`AmbientVoiceSubtitles.ini` (all keys are documented inline, in Chinese and
-English):
+`AmbientVoiceSubtitles.ini` (every key is documented inline, in both English
+and Chinese):
 
 | Key | Default | Meaning |
 | --- | --- | --- |
@@ -112,7 +123,7 @@ src/ini_template.h            generated: default .ini as a C string
 config/AmbientVoiceSubtitles.ini   the shipped default config
 tools/gen_ini_template.py     .ini -> src/ini_template.h
 tools/build.bat               build helper (zig or MSVC)
-docs/ARCHITECTURE.md          hooks, data flow, gotchas (for maintainers)
+docs/ARCHITECTURE.md          hooks, data flow, gotchas (maintainers, English)
 docs/开发日志.md               development log (Chinese)
 安装说明.txt                    end-user install guide (Chinese)
 ```
