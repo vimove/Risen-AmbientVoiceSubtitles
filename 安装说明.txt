@@ -1,0 +1,94 @@
+NPC随口台词头顶字幕（AmbientVoiceSubtitles v1.0）
+=================================================
+
+给《Risen》（崛起，2009）的 ASI 插件：NPC 路过时随口说的台词（俗称 bark，比如
+发现你、叫你放下武器、抱怨天气），游戏本身只有配音、没有字幕，这个插件把这些
+台词以文字形式显示在说话者头顶几秒。
+
+插件本身不带任何文本 —— 它直接读游戏自己的 data\compiled\strings.pak，
+并跟随你在游戏选项里选的语言。所以装完之后，游戏设成什么语言，字幕就是什么语言；
+装了汉化的玩家，看到的就是中文。
+
+
+运行要求
+--------
+- 《Risen》（2009）Steam 版。只在当前 Steam 版本上测试过（原版 / publicbeta 未测）。
+- 游戏 bin 目录里要有 ASI Loader（一个基于 Ultimate ASI Loader 的 d3d9.dll）。
+  下载地址：https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases
+  如果你已经装过别的 ASI 插件，那说明已经有了，不用再装。
+
+
+安装
+----
+1. 把压缩包里的 bin 文件夹整个拷进游戏的 bin 目录，例如
+   ...\Steam\steamapps\common\Risen\bin
+   拷完应该是这样：
+       bin\d3d9.dll                              （ASI Loader，你原有的）
+       bin\AmbientVoiceSubtitles.asi             （本插件）
+       bin\AmbientVoiceSubtitles.ini             （配置文件）
+2. 想改设置就编辑 AmbientVoiceSubtitles.ini。保存后最多 2 秒自动生效，
+   不用重启游戏、不用重进地图。
+
+
+配置项（AmbientVoiceSubtitles.ini）
+----------------------------------
+文件里每一项都有中英双语注释，最常改的几个：
+
+  Enabled         总开关：1 = 开启，0 = 关闭（不删文件就能临时停用）
+  Language        auto = 跟随游戏语言（推荐）
+                  也可以强制指定：English / German / French / Italian /
+                  Spanish / Polish / Russian，或直接写列名（如 French_Text，
+                  用于非官方语言补丁）
+  HeightCm        字幕高度（厘米）。230 = NPC 头顶上方 2.30 米
+  DurationMs      一句字幕停留多久（毫秒）。3000 = 3 秒
+  FadeMs          淡入 / 淡出时长（毫秒）
+  DistanceFade    1 = 说话者离得远时字幕淡出
+  FadeStartM      多少米开始淡出
+  FadeEndM        多少米之后完全不显示
+  MaxMessages     同屏最多几行（1–8）
+  Color           文字颜色，8 位 AARRGGBB，前两位是透明度
+                  （FF = 不透明，00 = 全透明，全透明时游戏会显示为黑色）
+                  也可以只写 6 位 RGB，程序自动补 FF
+                  例：纯白 FFFFFF / 深红 DC143C / 深橙色 FF8C00 / 淡黄 FFFFCC
+
+
+语言支持
+--------
+字幕取的是与游戏语音语言对应的那一列，所以英文、德文、法文、意大利文、西班牙文、
+波兰文、俄文都能直接用。
+
+汉化补丁通常是替换英文列：这种情况把游戏语言设成英文（或者 Language=auto）即可，
+字幕会自动显示中文。如果某个补丁是新增了一列，就把那个列名填进 Language=，
+例如 Language=Chinese_Text。
+
+
+已知限制
+--------
+- 同屏最多 8 行字幕。
+- 台词靠「最近 1.5 秒内开始说话、且距离最近」来匹配 NPC。两个 NPC 在同一区域
+  同时说同一句台词时，字幕可能显示在其中一个人头上。
+- 极少数台词在游戏数据里没有对应文本，会被静默跳过。
+
+
+卸载
+----
+删掉 bin\AmbientVoiceSubtitles.asi 即可。bin\AmbientVoiceSubtitles.ini 和
+bin\AmbientVoiceSubtitles.log 也可以一并删掉。
+
+
+出问题了怎么查
+--------------
+插件会在 bin\AmbientVoiceSubtitles.log 里记日志。如果字幕不显示，先看这个文件：
+- 有「PAK loaded: N keys, column=...」：说明已经读到游戏文本，看 column 是不是
+  你想要的语种。
+- 有「PAK not found」或 keys 很少：说明读不到 strings.pak（装了汉化包的话，
+  确认 data\compiled\strings.pak 是汉化后的那个）。
+- 文件没生成：说明插件没被加载，检查 bin 里的 ASI Loader（d3d9.dll）是否正常。
+
+汇报问题时，把 AmbientVoiceSubtitles.log 里的相关几行一起贴上，会好查很多。
+
+
+源码
+----
+本项目源码公开，欢迎接手维护、修 bug、加功能。构建方法和代码结构见仓库里的
+README.md 与 docs 目录。
