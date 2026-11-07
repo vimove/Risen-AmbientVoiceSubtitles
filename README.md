@@ -1,6 +1,6 @@
 # AmbientVoiceSubtitles
 
-**English** · [简体中文](README.zh-CN.md)
+**English** · [简体中文](须知.md)
 
 Floating subtitles above NPCs for their ambient voice lines ("barks") in
 *Risen* (2009).
@@ -19,30 +19,36 @@ see the translated text; players on English see English.
 This README is available in two languages:
 
 - **English** — this page
-- **简体中文** — [README.zh-CN.md](README.zh-CN.md)
+- **简体中文** — [须知.md](须知.md)
 
-Other documents:
+Other documents — each one exists in both languages, the link goes to the
+version in this README's language:
 
-- Maintainer notes (hooks, data flow, gotchas): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — English
-- End-user install guide: [安装说明.txt](安装说明.txt) — Chinese
-- Development log: [docs/开发日志.md](docs/开发日志.md) — Chinese
+- Maintainer notes (hooks, data flow, gotchas):
+  [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — English
+  · [中文版](docs/技术笔记.md)
+- End-user install guide: [Installation.txt](Installation.txt) — English
+  · [中文版](安装说明.txt)
+- Development log: [docs/Development-Log.md](docs/Development-Log.md) — English
+  · [中文版](docs/开发日志.md)
 
 ## Features
 
 - Subtitles above the NPC who is talking, not a fixed corner HUD element.
 - Works with English, German, French, Italian, Spanish, Polish and Russian game
   text; `Language=auto` follows whatever the game is set to.
-- Works with translation patches that replace one of those columns (most Risen
-  Chinese patches replace the English column — set the game to English).
+- Works with **translation patches** that replace one of those columns (most
+  Risen translation patches replace the English column — set the game to English).
 - Every option is live: edit the `.ini`, save, and it applies within ~2 seconds.
   No restart, no reloading a save.
-- Optional distance fading, configurable height, duration, fade time, colours
-  and how many messages may be on screen at once.
+- Optional distance fading, configurable height, duration, fade-out time,
+  colours and how many messages may be on screen at once.
 
 ## Requirements
 
-- *Risen* (2009), Steam version. Only tested against the current Steam build
-  (neither the original retail build nor the public beta).
+- *Risen* (2009), Steam version. Only tested against the current default Steam
+  build; the 2009 original and the public beta branch (both selectable under
+  *Steam → Betas*) were not tested.
 - An ASI loader in the game's `bin` folder (a `d3d9.dll` based on
   [Ultimate ASI Loader](https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases)).
   If you already run other ASI mods, you have it.
@@ -51,8 +57,9 @@ Other documents:
 
 1. Copy the `bin` folder from the release zip into the game's `bin` folder,
    e.g. `...\Steam\steamapps\common\Risen\bin`.
-2. Edit `AmbientVoiceSubtitles.ini` if you want to change anything.
-   Changes apply within about 2 seconds.
+2. Edit `AmbientVoiceSubtitles.ini` if you want to change anything. Changes
+   apply within about 2 seconds **after you save the file** — no restart, no
+   reloading a save.
 
 Result:
 
@@ -76,8 +83,8 @@ and Chinese):
 | `Enabled` | `1` | master switch |
 | `Language` | `auto` | `auto` follows the game's voice language; or force `English` / `German` / `French` / `Italian` / `Spanish` / `Polish` / `Russian`; or a raw column name such as `French_Text` |
 | `HeightCm` | `230` | height above the NPC's head, in centimetres |
-| `DurationMs` | `3000` | how long one line stays on screen |
-| `FadeMs` | `800` | fade in / fade out time |
+| `DurationMs` | `3000` | how long one line stays on screen, in milliseconds (3000 = 3 s) |
+| `FadeMs` | `800` | fade-out time: how long the text takes to turn transparent before it disappears, in milliseconds (`0` = no fade, it just vanishes) |
 | `DistanceFade` | `1` | fade with distance |
 | `FadeStartM` | `10` | distance where fading starts (metres) |
 | `FadeEndM` | `15` | distance where the text is fully gone |
@@ -106,7 +113,7 @@ Visual Studio needed) or Visual Studio's C++ toolchain.
 
 ```bat
 python tools\gen_ini_template.py     :: only needed after editing config\*.ini
-tools\build.bat                      :: uses zig if available, else MSVC cl
+tools\build.bat                   :: uses zig if available, else MSVC cl
 ```
 
 Output: `build\AmbientVoiceSubtitles.asi`. Copy it to the game's `bin` folder.
@@ -118,20 +125,26 @@ the user has no `.ini` yet.
 ## Project layout
 
 ```
-src/AmbientVoiceSubtitles.c   the plugin (single translation unit, plain C)
-src/ini_template.h            generated: default .ini as a C string
-config/AmbientVoiceSubtitles.ini   the shipped default config
-tools/gen_ini_template.py     .ini -> src/ini_template.h
-tools/build.bat               build helper (zig or MSVC)
-docs/ARCHITECTURE.md          hooks, data flow, gotchas (maintainers, English)
-docs/开发日志.md               development log (Chinese)
-安装说明.txt                    end-user install guide (Chinese)
+src/AmbientVoiceSubtitles.c       the plugin (single translation unit, plain C)
+src/ini_template.h                generated: default .ini as a C string
+config/AmbientVoiceSubtitles.ini  the shipped default config
+tools/gen_ini_template.py         .ini -> src/ini_template.h
+tools/build.bat                   build helper (zig or MSVC)
+docs/ARCHITECTURE.md              hooks, data flow, gotchas (maintainers, English)
+docs/技术笔记.md                  the same document in Chinese
+docs/Development-Log.md           development log (English)
+docs/开发日志.md                  development log (Chinese)
+Installation.txt                  end-user install guide (English)
+安装说明.txt                      end-user install guide (Chinese)
 ```
 
 ## Troubleshooting
 
 The plugin writes `bin\AmbientVoiceSubtitles.log`. Useful lines:
 
+- `=== AmbientVoiceSubtitles v20 loaded pid=... ===` — the plugin loaded. `v20`
+  is the development iteration number, not the mod's version (the release is
+  version 1.0); a log that says `v20` is current.
 - `PAK loaded: N keys, column=English_Text` — text was read; check the column
   matches the language you expect.
 - `PAK not found` / very small `N` — `strings.pak` could not be read.
