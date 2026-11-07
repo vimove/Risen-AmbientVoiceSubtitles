@@ -1,5 +1,7 @@
 # Architecture and maintainer notes
 
+**English** · [简体中文](技术笔记.md)
+
 This is the "how and why" document for anyone who wants to fix or extend the
 plugin. The whole plugin is one C file (`src/AmbientVoiceSubtitles.c`); there
 are no external dependencies and no C++ runtime.
@@ -118,6 +120,10 @@ If the language changes while the game is running (e.g. the player switches
 language in the options), `init_thread` notices the column differs from the one
 that was loaded and reloads the pak.
 
+If the requested column does not exist in the pak, the plugin falls back to
+`English_Text` and logs `PAK column <x> missing, fallback English_Text` — a typo
+in `Language=` therefore shows English text rather than nothing.
+
 If `strings.pak` cannot be read at all, the plugin falls back to the legacy
 JSON text dump (`AmbientVoiceSubtitles.zh.json`, or `svms_zh.json`) if one is
 present, and logs that it did so. That path exists only for old installs; the pak
@@ -167,7 +173,8 @@ These cost real debugging time; please keep them in mind when changing the code.
 
 ## Debugging
 
-`bin\AmbientVoiceSubtitles.log` (truncated per run) contains, in order:
+`bin\AmbientVoiceSubtitles.log` is appended to on every run (previous runs stay
+at the top), and a single run contains, in order:
 
 - `=== AmbientVoiceSubtitles v20 loaded pid=... ===`
 - resolved API addresses (`api addsmsg=... getinst=...`)
@@ -175,6 +182,9 @@ These cost real debugging time; please keep them in mind when changing the code.
 - `BARK key=SVM_..._... speaker=... text="..."`
 - `PAK loaded: N keys, column=...`
 - `VT hooked OnBeginFrame slot=N` once the vtable hook is in place
+
+The `v20` in the first line is the development iteration number, not the mod's
+version (the release is version 1.0), so a log that says `v20` is up to date.
 
 `NOKEY`, `NOSPEAKER`, `PAK not found`, `VT NOT hooked` and `... EXCEPTION
 code=` are the interesting failure lines. See the end-user guide

@@ -1,0 +1,118 @@
+AmbientVoiceSubtitles v1.0 — NPC ambient voice subtitles
+========================================================
+
+An ASI plugin for Risen (2009): NPCs say a few words in passing (a "bark" — they
+spot you, tell you to put your weapon away, complain about the weather...). The
+game plays the voice line but shows no text. This plugin puts that line above the
+speaker's head as a subtitle for a few seconds.
+
+The plugin ships no text of its own — it reads the game's own
+data\compiled\strings.pak and follows the language selected in the game options.
+So after installing, the subtitles are in whatever language the game is set to:
+run a translation patch and you see the patched text.
+
+Chinese version of this file: 安装说明.txt
+
+
+Requirements
+------------
+- Risen (2009), Steam version. Only tested against the current default Steam
+  build (the 2009 original and the public beta branch were not tested).
+- An ASI loader in the game's bin folder (a d3d9.dll based on Ultimate ASI
+  Loader). Download: https://github.com/ThirteenAG/Ultimate-ASI-Loader/releases
+  If you already run other ASI plugins you have it — nothing more to install.
+
+
+Installation
+------------
+1. Copy the whole bin folder from the zip into the game's bin folder, e.g.
+   ...\Steam\steamapps\common\Risen\bin
+   It should look like this:
+       bin\d3d9.dll                              (ASI loader, yours)
+       bin\AmbientVoiceSubtitles.asi             (this plugin)
+       bin\AmbientVoiceSubtitles.ini             (config)
+2. Edit AmbientVoiceSubtitles.ini to change anything. The settings apply within
+   2 seconds after you save the file — no restart, no reloading the map.
+
+
+Configuration (AmbientVoiceSubtitles.ini)
+-----------------------------------------
+Every key is documented in the file, in both English and Chinese. The ones
+people change most:
+
+  Enabled         master switch: 1 = on, 0 = off (temporarily disable without
+                  deleting the file)
+  Language        auto = follow the game language (recommended)
+                  or force one: English / German / French / Italian /
+                  Spanish / Polish / Russian, or a raw column name such as
+                  French_Text (for unofficial language patches)
+  HeightCm        subtitle height (centimetres). 230 = 2.30 m above the NPC's
+                  head
+  DurationMs      how long one line stays (milliseconds). 3000 = 3 seconds
+  FadeMs          fade-out duration (milliseconds): how long the text takes to
+                  turn transparent before it disappears; 0 = no fade
+  DistanceFade    1 = fade out when the speaker is far away
+  FadeStartM      distance (m) where fading starts
+  FadeEndM        distance (m) beyond which the text is not drawn at all
+  MaxMessages     max lines on screen at once (1-8)
+  Color           text colour, 8-digit AARRGGBB, the first two digits are alpha
+                  (FF = opaque, 00 = fully transparent, and fully transparent is
+                  drawn as black by the game)
+                  a 6-digit RGB value works too, FF is added automatically
+                  examples: white FFFFFF / crimson DC143C / dark orange FF8C00 /
+                  pale yellow FFFFCC
+
+
+Language support
+----------------
+The subtitle is read from the column that matches the game's voice language, so
+English, German, French, Italian, Spanish, Polish and Russian all work out of the
+box.
+
+Chinese patches usually replace the English column: in that case set the game
+language to English (or leave Language=auto) and the subtitles appear in Chinese.
+If a patch adds a new column instead, put that column name into Language=, e.g.
+Language=Chinese_Text. If the name is misspelled or the column does not exist,
+the subtitles fall back to the English column (the log then says
+PAK column ... missing, fallback English_Text).
+
+
+Known limitations
+-----------------
+- At most 8 lines on screen at once.
+- The speaker is matched by "started talking within the last 1.5 s and is the
+  nearest such NPC". Two NPCs in the same area saying the same line at the same
+  time can make the subtitle appear over the wrong one.
+- A few lines have no matching text in the game data and are skipped silently.
+
+
+Uninstalling
+------------
+Delete bin\AmbientVoiceSubtitles.asi. bin\AmbientVoiceSubtitles.ini and
+bin\AmbientVoiceSubtitles.log can be deleted as well.
+
+
+If it does not work
+-------------------
+The plugin writes a log to bin\AmbientVoiceSubtitles.log (it is appended to, so
+the newest run is at the end of the file). If no subtitles show up, read that
+file first:
+- the first line, "=== AmbientVoiceSubtitles v20 loaded ... ===": the plugin
+  loaded. `v20` is the development iteration number, not the mod's version (the
+  release is version 1.0); a log that says `v20` is current.
+- "PAK loaded: N keys, column=...": the game text was read; check that the column
+  is the language you expect.
+- "PAK not found" or a very small number of keys: strings.pak could not be read
+  (if a translation patch is installed, make sure data\compiled\strings.pak is
+  the patched one).
+- no log file at all: the plugin was never loaded; check that the ASI loader
+  (d3d9.dll) in bin is working.
+
+When reporting a problem, paste the relevant lines of
+AmbientVoiceSubtitles.log — it makes things much easier to diagnose.
+
+
+Source code
+-----------
+The project is open source; maintainers, bug fixes and features are welcome.
+Build instructions and the code layout are in README.md and the docs folder.
